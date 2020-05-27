@@ -86,6 +86,7 @@
     </Compile>
     <Compile Include="Helper\LocalDB.cs" />
     <Compile Include="ITopButton.cs" />
+    <Compile Include="Models\InvoiceItemModel.cs" />
     <Compile Include="Models\InvoiceModel.cs" />
     <Compile Include="ProdMaster.cs">
       <SubType>Form</SubType>

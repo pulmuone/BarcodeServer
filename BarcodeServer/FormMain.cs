@@ -245,7 +245,6 @@ namespace BarcodeServer
 
         private void FormMain_KeyDown(object sender, KeyEventArgs e)
         {
-
             if (e.KeyCode == Keys.F2 || e.KeyCode == Keys.F4 || e.KeyCode == Keys.F8 || e.KeyCode == Keys.F9 || e.KeyCode == Keys.F12)
             {
                 switch (e.KeyCode)

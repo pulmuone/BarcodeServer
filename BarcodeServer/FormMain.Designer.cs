@@ -96,14 +96,14 @@
             // prodMasterToolStripMenuItem
             // 
             this.prodMasterToolStripMenuItem.Name = "prodMasterToolStripMenuItem";
-            this.prodMasterToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.prodMasterToolStripMenuItem.Size = new System.Drawing.Size(138, 22);
             this.prodMasterToolStripMenuItem.Text = "상품 마스터";
             this.prodMasterToolStripMenuItem.Click += new System.EventHandler(this.prodMasterToolStripMenuItem_Click);
             // 
             // scanListToolStripMenuItem
             // 
             this.scanListToolStripMenuItem.Name = "scanListToolStripMenuItem";
-            this.scanListToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.scanListToolStripMenuItem.Size = new System.Drawing.Size(138, 22);
             this.scanListToolStripMenuItem.Text = "바코드 스캔";
             this.scanListToolStripMenuItem.Click += new System.EventHandler(this.scanListToolStripMenuItem_Click);
             // 
@@ -356,6 +356,7 @@
             this.Controls.Add(this.toolStrip);
             this.Controls.Add(this.menuStrip);
             this.IsMdiContainer = true;
+            this.KeyPreview = true;
             this.MainMenuStrip = this.menuStrip;
             this.Name = "FormMain";
             this.Text = "FormMain";
