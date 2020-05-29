@@ -175,8 +175,8 @@ namespace BarcodeServer.Helper
 					insertCommand.Transaction = mytransaction;
 					insertCommand.Connection = connection;
 					insertCommand.CommandText = @"
-													INSERT INTO invoice_items(invoice_id, item_id, item_nm, order_qty, scan_qty, create_date, modify_date) VALUES 
-													(@invoice_id, @item_id, @item_nm, @order_qty, @scan_qty, @create_date, @modify_date)
+													INSERT INTO invoice_items(invoice_id, item_id, item_nm, order_qty, scan_qty, create_date) VALUES 
+													(@invoice_id, @item_id, @item_nm, @order_qty, @scan_qty, @create_date)
 												";
 
 					insertCommand.Parameters.Add("@invoice_id", DbType.Int32);
@@ -185,7 +185,7 @@ namespace BarcodeServer.Helper
 					insertCommand.Parameters.Add("@order_qty", DbType.Int32);
 					insertCommand.Parameters.Add("@scan_qty", DbType.Int32);
 					insertCommand.Parameters.Add("@create_date", DbType.String);
-					insertCommand.Parameters.Add("@modify_date", DbType.String);
+					//insertCommand.Parameters.Add("@modify_date", DbType.String);
 
 					foreach (var item in itemList)
 					{
@@ -195,7 +195,7 @@ namespace BarcodeServer.Helper
 						insertCommand.Parameters[3].Value = item.OrderQty;
 						insertCommand.Parameters[4].Value = item.ScanQty;
 						insertCommand.Parameters[5].Value = item.CreateDate;
-						insertCommand.Parameters[6].Value = item.ModifyDate;
+						//insertCommand.Parameters[6].Value = item.ModifyDate;
 						insertCommand.Prepare();
 						int affected1 = insertCommand.ExecuteNonQuery();
 						Console.WriteLine("# of affected row: " + affected1);
@@ -244,7 +244,7 @@ namespace BarcodeServer.Helper
 						insertCommand.Parameters[2].Value = item.ItemId;
 						insertCommand.Parameters[3].Value = item.ItemNm;
 						insertCommand.Parameters[4].Value = item.OrderQty;
-						insertCommand.Parameters[4].Value = item.ScanQty;
+						insertCommand.Parameters[5].Value = item.ScanQty;
 						insertCommand.Parameters[6].Value = item.ModifyDate;
 						insertCommand.Prepare();
 						int affected1 = insertCommand.ExecuteNonQuery();

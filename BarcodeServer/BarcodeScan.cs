@@ -107,7 +107,7 @@ namespace BarcodeServer
             }
             else
             {
-                if (string.IsNullOrEmpty(dgvInvoiceItems.Rows[e.RowIndex].Cells["ScanDate"].Value?.ToString()))
+                if (string.IsNullOrEmpty(dgvInvoiceItems.Rows[e.RowIndex].Cells["CreateDate2"].Value?.ToString()))
                 {
                     itemModel.InvoiceLineId = 0;
                 }
@@ -159,12 +159,11 @@ namespace BarcodeServer
             {
                 itemModel.ScanQty = Convert.ToInt32(dgvInvoiceItems.Rows[e.RowIndex].Cells["ScanQty"].Value?.ToString());
             }
-
-            
-            itemModel.CreateDate = DateTime.Now.ToString("yyyy-MM-dd");
+                        
+            itemModel.CreateDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             itemModel.ModifyDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
-            if(!string.IsNullOrEmpty(itemModel.ItemId) && !string.IsNullOrEmpty(itemModel.ItemNm))
+            if (!string.IsNullOrEmpty(itemModel.ItemId) && !string.IsNullOrEmpty(itemModel.ItemNm))
             {
                 List<InvoiceItemModel> lst = new List<InvoiceItemModel>();
                 lst.Add(itemModel);
@@ -172,44 +171,15 @@ namespace BarcodeServer
                 if (itemModel.InvoiceLineId == 0) //Insert
                 {
                     LocalDB.Instance.InvoiceItemInsert(_activeInvoiceId, lst);
+
+                    //수정의 기준이 되는 입력일자 화면에 업데이트 해준다.
+                    dgvInvoiceItems.Rows[e.RowIndex].Cells["CreateDate2"].Value = itemModel.CreateDate;
                 }
                 else //Update
                 {
                     LocalDB.Instance.InvoiceItemUpdate(lst);
                 }
             }
-
-
-            /*
-            foreach (DataGridViewRow row in dgvInvoiceItems.Rows)
-            {
-                Console.WriteLine(row.Cells["InvoiceLineId"].Value?.ToString());
-                Console.WriteLine(row.Cells["InvoiceId2"].Value?.ToString());
-                Console.WriteLine(row.Cells["ItemId"].Value?.ToString());
-                Console.WriteLine(row.Cells["ItemNm"].Value?.ToString());
-                Console.WriteLine(row.Cells["OrderQty"].Value?.ToString());
-                Console.WriteLine(row.Cells["ScanQty"].Value?.ToString());
-
-                itemModel.InvoiceLineId = row.Cells["InvoiceLineId"].Value == null ? 0 : Convert.ToInt32(row.Cells["InvoiceLineId"].Value);
-                itemModel.InvoiceId = row.Cells["InvoiceId"].Value == null ? _activeInvoiceId : Convert.ToInt32(row.Cells["InvoiceId"].Value);
-                itemModel.ItemId = row.Cells["ItemId"].Value?.ToString();
-                itemModel.ItemNm = row.Cells["ItemNm"].Value?.ToString();
-                itemModel.OrderQty = row.Cells["OrderQty"].Value == null ? 0 : Convert.ToInt32(row.Cells["OrderQty"].Value);
-                itemModel.ScanQty = row.Cells["ScanQty"].Value == null ? 0 : Convert.ToInt32(row.Cells["ScanQty"].Value);
-
-                if(itemModel.InvoiceLineId == 0)
-                {
-                    //Insert
-
-
-                }
-                else
-                {
-                    //Update
-
-                }
-            }
-            */
         }
 
         private void dgvInvoices_CellClick(object sender, DataGridViewCellEventArgs e)
