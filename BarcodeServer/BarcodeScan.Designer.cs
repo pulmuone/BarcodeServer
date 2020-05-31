@@ -80,8 +80,8 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
-            this.splitContainer1.Size = new System.Drawing.Size(1002, 701);
-            this.splitContainer1.SplitterDistance = 72;
+            this.splitContainer1.Size = new System.Drawing.Size(1008, 729);
+            this.splitContainer1.SplitterDistance = 74;
             this.splitContainer1.TabIndex = 0;
             // 
             // dtpTo
@@ -113,8 +113,8 @@
             // splitContainer2.Panel2
             // 
             this.splitContainer2.Panel2.Controls.Add(this.dgvInvoiceItems);
-            this.splitContainer2.Size = new System.Drawing.Size(1002, 625);
-            this.splitContainer2.SplitterDistance = 497;
+            this.splitContainer2.Size = new System.Drawing.Size(1008, 651);
+            this.splitContainer2.SplitterDistance = 499;
             this.splitContainer2.TabIndex = 0;
             // 
             // dgvInvoices
@@ -140,10 +140,12 @@
             this.dgvInvoices.MultiSelect = false;
             this.dgvInvoices.Name = "dgvInvoices";
             this.dgvInvoices.RowTemplate.Height = 23;
-            this.dgvInvoices.Size = new System.Drawing.Size(497, 625);
+            this.dgvInvoices.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.dgvInvoices.Size = new System.Drawing.Size(499, 651);
             this.dgvInvoices.TabIndex = 0;
             this.dgvInvoices.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvInvoices_CellClick);
             this.dgvInvoices.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvInvoices_CellEndEdit);
+            this.dgvInvoices.SelectionChanged += new System.EventHandler(this.dgvInvoices_SelectionChanged);
             // 
             // InvoiceId
             // 
@@ -151,6 +153,7 @@
             this.InvoiceId.HeaderText = "InvoiceId";
             this.InvoiceId.Name = "InvoiceId";
             this.InvoiceId.ReadOnly = true;
+            this.InvoiceId.Visible = false;
             this.InvoiceId.Width = 50;
             // 
             // InvoiceDate
@@ -159,6 +162,7 @@
             this.InvoiceDate.HeaderText = "전표일자";
             this.InvoiceDate.Name = "InvoiceDate";
             this.InvoiceDate.ReadOnly = true;
+            this.InvoiceDate.Visible = false;
             // 
             // InvoiceTitle
             // 
@@ -207,7 +211,7 @@
             this.dgvInvoiceItems.Location = new System.Drawing.Point(0, 0);
             this.dgvInvoiceItems.Name = "dgvInvoiceItems";
             this.dgvInvoiceItems.RowTemplate.Height = 23;
-            this.dgvInvoiceItems.Size = new System.Drawing.Size(501, 625);
+            this.dgvInvoiceItems.Size = new System.Drawing.Size(505, 651);
             this.dgvInvoiceItems.TabIndex = 0;
             this.dgvInvoiceItems.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvInvoiceItems_CellEndEdit);
             // 
@@ -282,7 +286,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1002, 701);
+            this.ClientSize = new System.Drawing.Size(1008, 729);
             this.Controls.Add(this.splitContainer1);
             this.Name = "BarcodeScan";
             this.Text = "BarcodeScan";
@@ -309,10 +313,6 @@
         private System.Windows.Forms.DataGridView dgvInvoiceItems;
         private System.Windows.Forms.DateTimePicker dtpFrom;
         private System.Windows.Forms.DateTimePicker dtpTo;
-        private System.Windows.Forms.DataGridViewTextBoxColumn InvoiceId;
-        private System.Windows.Forms.DataGridViewTextBoxColumn InvoiceDate;
-        private System.Windows.Forms.DataGridViewTextBoxColumn InvoiceTitle;
-        private System.Windows.Forms.DataGridViewTextBoxColumn CreateDate;
         private System.Windows.Forms.DataGridViewTextBoxColumn InvoiceLineId;
         private System.Windows.Forms.DataGridViewTextBoxColumn InvoiceId2;
         private System.Windows.Forms.DataGridViewTextBoxColumn ItemId;
@@ -322,5 +322,9 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn CreateDate2;
         private System.Windows.Forms.DataGridViewTextBoxColumn ModifyDate;
         private System.Windows.Forms.DataGridViewTextBoxColumn ScanDate;
+        private System.Windows.Forms.DataGridViewTextBoxColumn InvoiceId;
+        private System.Windows.Forms.DataGridViewTextBoxColumn InvoiceDate;
+        private System.Windows.Forms.DataGridViewTextBoxColumn InvoiceTitle;
+        private System.Windows.Forms.DataGridViewTextBoxColumn CreateDate;
     }
 }

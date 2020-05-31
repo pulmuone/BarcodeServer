@@ -2,12 +2,8 @@
 using BarcodeServer.Models;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Net.Http.Headers;
 using System.Windows.Forms;
 
 namespace BarcodeServer
@@ -27,6 +23,7 @@ namespace BarcodeServer
             dtpFrom.Value = System.DateTime.Today;
             dtpTo.Value = System.DateTime.Today;
 
+            Search();
         }
 
         public void Download()
@@ -41,10 +38,26 @@ namespace BarcodeServer
 
         public void Search()
         {
-            DataTable dt = LocalDB.Instance.InvoiceSearch(dtpFrom.Value.ToString("yyyy-MM-dd"), dtpTo.Value.ToString("yyyy-MM-dd"));
-            Console.WriteLine(dt.Rows.Count);
+            try
+            {
+                dgvInvoiceItems.Enabled = false;
 
-            dgvInvoices.DataSource = dt;
+                int rowCount = dgvInvoiceItems.Rows.Count;
+                for (int n = 0; n < rowCount; n++)
+                {
+                    if (dgvInvoiceItems.Rows[0].IsNewRow == false)
+                        dgvInvoiceItems.Rows.RemoveAt(0);
+                }
+
+                DataTable dt = LocalDB.Instance.InvoiceSearch(dtpFrom.Value.ToString("yyyy-MM-dd"), dtpTo.Value.ToString("yyyy-MM-dd"));
+                Console.WriteLine(dt.Rows.Count);
+
+                dgvInvoices.DataSource = dt;
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
 
         public void Upload()
@@ -75,7 +88,7 @@ namespace BarcodeServer
                 if (!string.IsNullOrEmpty(invoiceModel.InvoiceTitle))
                 {
                     string invoice_id = LocalDB.Instance.InvoiceInsert(invoiceModel);
-
+                    //Search();
                     dgvInvoices.Rows[e.RowIndex].Cells["InvoiceId"].Value = invoice_id;
                     dgvInvoices.Rows[e.RowIndex].Cells["InvoiceDate"].Value = invoiceModel.InvoiceDate;
                     dgvInvoices.Rows[e.RowIndex].Cells["CreateDate"].Value = invoiceModel.CreateDate;
@@ -90,9 +103,9 @@ namespace BarcodeServer
                 invoiceModel.CreateDate = dgvInvoices.Rows[e.RowIndex].Cells["CreateDate"].Value.ToString();
 
                 LocalDB.Instance.InvoiceUpdate(invoiceModel);
-
+                //Search();
                 dgvInvoices.Rows[e.RowIndex].Cells["InvoiceTitle"].Value = invoiceModel.InvoiceTitle;
-               
+
             }
         }
 
@@ -173,12 +186,17 @@ namespace BarcodeServer
                     LocalDB.Instance.InvoiceItemInsert(_activeInvoiceId, lst);
 
                     //수정의 기준이 되는 입력일자 화면에 업데이트 해준다.
-                    dgvInvoiceItems.Rows[e.RowIndex].Cells["CreateDate2"].Value = itemModel.CreateDate;
+                    //dgvInvoiceItems.Rows[e.RowIndex].Cells["CreateDate2"].Value = itemModel.CreateDate;
                 }
                 else //Update
                 {
                     LocalDB.Instance.InvoiceItemUpdate(lst);
                 }
+
+                DataTable dt = LocalDB.Instance.InvoiceItemSearch(_activeInvoiceId);
+                Console.WriteLine(dt.Rows.Count);
+
+                dgvInvoiceItems.DataSource = dt;
             }
         }
 
@@ -186,8 +204,6 @@ namespace BarcodeServer
         {
             Console.WriteLine(e.RowIndex);
             Console.WriteLine(e.ColumnIndex);
-
-            dgvInvoiceItems.Enabled = true;
 
             string invoice_date = string.Empty;
 
@@ -208,12 +224,41 @@ namespace BarcodeServer
                         Console.WriteLine(dt.Rows.Count);
 
                         dgvInvoiceItems.DataSource = dt;
+                        dgvInvoiceItems.Enabled = true;
                     }
                 }
             }
             else
             {
                 _activeInvoiceId = 0;
+            }
+        }
+
+        private void dgvInvoices_SelectionChanged(object sender, EventArgs e)
+        {
+            if (dgvInvoices.SelectedRows.Count > 0)
+            {
+                Console.WriteLine(dgvInvoices.SelectedRows[0].Cells["InvoiceId"].Value);
+                string invoice_date = string.Empty;
+                
+                if (dgvInvoices.SelectedRows[0].Cells["InvoiceId"].Value == null)
+                {
+                    _activeInvoiceId = 0;
+                }
+                else
+                {
+                    invoice_date = dgvInvoices.SelectedRows[0].Cells["InvoiceDate"].Value?.ToString();
+                    if (!string.IsNullOrEmpty(invoice_date))
+                    {
+                        _activeInvoiceId = Convert.ToInt32(dgvInvoices.SelectedRows[0].Cells["InvoiceId"].Value);
+
+                        DataTable dt = LocalDB.Instance.InvoiceItemSearch(_activeInvoiceId);
+                        Console.WriteLine(dt.Rows.Count);
+
+                        dgvInvoiceItems.DataSource = dt;
+                        dgvInvoiceItems.Enabled = true;
+                    }
+                }
             }
         }
     }
