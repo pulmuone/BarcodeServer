@@ -142,7 +142,7 @@ namespace BarcodeServer.Helper
 				SQLiteCommand selectCommand = new SQLiteCommand();
 				selectCommand.Connection = connection;
 				selectCommand.CommandText = @"
-												SELECT invoice_line_id AS InvoiceLineId,
+												SELECT  invoice_line_id AS InvoiceLineId,
 														invoice_id AS InvoiceId, 
 														item_id AS ItemId, 
 														item_nm AS ItemNm, 
