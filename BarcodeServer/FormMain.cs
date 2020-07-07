@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BarcodeServer.Services;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -17,6 +18,8 @@ namespace BarcodeServer
         public FormMain()
         {
             InitializeComponent();
+
+            Task.Factory.StartNew(() => AsyncSocketListener.StartListening());
         }
 
         private void ShowNewForm(object sender, EventArgs e)

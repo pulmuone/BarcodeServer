@@ -104,6 +104,40 @@ namespace BarcodeServer.Helper
 			return dt;
 		}
 
+		public DataTable InvoiceItemSearch(string fromDate, string toDate)
+		{
+			DataTable dt = new DataTable();
+
+			using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+			{
+				connection.Open();
+
+				SQLiteCommand selectCommand = new SQLiteCommand();
+				selectCommand.Connection = connection;
+				selectCommand.CommandText = @"
+												SELECT  b.invoice_line_id AS InvoiceLineId,
+														b.invoice_id AS InvoiceId, 
+														b.item_id AS ItemId, 
+														b.item_nm AS ItemNm, 
+														b.order_qty AS OrderQty, 
+														b.scan_qty AS ScanQty, 
+														b.create_date AS CreateDate, 
+														b.modify_date AS ModifyDate,
+														b.scan_date AS ScanDate
+												FROM invoices a inner join invoice_items b on(a.invoice_id = b.invoice_id)
+												WHERE a.invoice_date BETWEEN @fromDate AND @toDate 										
+												ORDER BY a.invoice_id, b.invoice_line_id;
+											";
+				selectCommand.Parameters.AddWithValue("@fromDate", fromDate);
+				selectCommand.Parameters.AddWithValue("@toDate", toDate);
+
+				SQLiteDataReader reader = selectCommand.ExecuteReader();
+				dt.Load(reader);
+			}
+
+			return dt;
+		}
+
 
 		public void InvoiceUpdate(InvoiceModel invoiceModel)
 		{
@@ -220,13 +254,13 @@ namespace BarcodeServer.Helper
 					insertCommand.CommandText = @"
 													UPDATE invoice_items
 													SET 
-														item_nm = @item_nm
+														item_id = @item_id
+													,	item_nm = @item_nm
 													,	order_qty = @order_qty
 													,	scan_qty = @scan_qty
 													,	modify_date = @modify_date
 													WHERE invoice_line_id = @invoice_line_id
-													AND invoice_id = @invoice_id
-													AND item_id = @item_id;
+													AND invoice_id = @invoice_id;
 												";
 
 					insertCommand.Parameters.Add("@invoice_line_id", DbType.Int32);

@@ -193,10 +193,13 @@ namespace BarcodeServer
                     LocalDB.Instance.InvoiceItemUpdate(lst);
                 }
 
-                DataTable dt = LocalDB.Instance.InvoiceItemSearch(_activeInvoiceId);
-                Console.WriteLine(dt.Rows.Count);
-
-                dgvInvoiceItems.DataSource = dt;
+                //DataTable dt = LocalDB.Instance.InvoiceItemSearch(_activeInvoiceId);
+                //Console.WriteLine(dt.Rows.Count);
+                
+                // this.BeginInvoke(new MethodInvoker(() =>
+                // {
+                //     dgvInvoiceItems.DataSource = dt;
+                // }));
             }
         }
 

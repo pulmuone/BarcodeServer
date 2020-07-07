@@ -16,9 +16,9 @@ namespace BarcodeServer.Services
     {
         // Client  socket.  
         public Socket workSocket = null;
-        // Size of receive buffer.  
+        // Size of receive buffer.
         public const int BufferSize = 1024;
-        // Receive buffer.  
+        // Receive buffer.
         public byte[] buffer = new byte[BufferSize];
         // Received data string.  
         public StringBuilder sb = new StringBuilder();
@@ -38,7 +38,7 @@ namespace BarcodeServer.Services
 
         public static void StartListening()
         {
-            IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, 7000);
+            IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, 11000);
             Socket listener = new Socket(SocketType.Stream, ProtocolType.Tcp);
             try
             {
@@ -94,70 +94,44 @@ namespace BarcodeServer.Services
                 {
                     Console.WriteLine("Text received : {0}", content);
 
-                    Dictionary<string, string> pObj = JsonConvert.DeserializeObject<Dictionary<string, string>>(content);
+                    Dictionary<string, string> requestDic = JsonConvert.DeserializeObject<Dictionary<string, string>>(content);
 
-                    if(pObj.ContainsKey("CMD"))
+                    if(requestDic.ContainsKey("CMD"))
                     {
-                        var cmd = pObj["CMD"].ToString();
+                        var cmd = requestDic["CMD"].ToString();
 
                         if(cmd == "PULL")
                         {
-                            if (pObj.ContainsKey("SCANDATE"))
+                            if (requestDic.ContainsKey("SCANDATE"))
                             {
-                                var scanDate = pObj["SCANDATE"].ToString();
+                                var scanDate = requestDic["SCANDATE"].ToString();
                                 //ToDo
                                 //헤더와 상세 데이터를 모바일로 전송한다.
+                                DataTable dtHeader = LocalDB.Instance.InvoiceSearch(scanDate, scanDate);
+                                string jsonHeader = JsonConvert.SerializeObject(dtHeader);
 
-                                DataTable dt = LocalDB.Instance.InvoiceSearch(scanDate, scanDate);
-                                string jsonHeader = JsonConvert.SerializeObject(dt, Formatting.Indented);
+                                DataTable dtItem = LocalDB.Instance.InvoiceItemSearch(scanDate, scanDate);
+                                string jsonItem = JsonConvert.SerializeObject(dtItem);
+
+                                Dictionary<string, string> responseDic = new Dictionary<string, string>
+                                {
+                                    { "CMD", "PULL_RESULT" },
+                                    { "HEADER", jsonHeader},
+                                    { "ITEM", jsonItem},
+                                    { "EOF", "<EOF>" }
+                                };
+
+                                string jsonResponse = JsonConvert.SerializeObject(responseDic);
+                                Send(handler, jsonResponse);
                             }
                         }
                     }
-
-                    foreach (var item in pObj.Keys)
-                    {
-                        Console.WriteLine(item.ToString()); //key
-                        Console.WriteLine(pObj[item]);  //value
-
-                        if(item.ToString().Equals("CMD"))
-                        {
-                            var cmd = pObj[item].ToString();
-
-                            if(cmd == "PULL")
-                            {
-                                var scanDate = "";
-                            }
-                            else if(cmd == "PUSH")
-                            {
-
-                            }
-                        }
-
-                        //if (item.ToString().Equals("P_JSON"))
-                        //{
-                        //    List<EmpModel> lst = new List<EmpModel>();
-                        //    lst = JsonConvert.DeserializeObject<List<EmpModel>>(pObj[item]);
-
-                        //    StringBuilder sb = new StringBuilder();
-                        //    foreach (var row in lst)
-                        //    {
-                        //        string binaryString = string.Empty;
-
-                        //        //Console.WriteLine(string.Format("{0}, {1}",item.EmpId, ByteToString(item.EmpName)));
-                        //        Console.WriteLine(string.Format("{0}, {1}", row.EmpId, row.EmpName));
-                        //        sb.AppendLine(string.Format("{0}, {1}", row.EmpId, row.EmpName));
-                        //    }
-
-                        //    //File.WriteAllText("test.txt", sb.ToString());
-                        //}
-                    }
-
-                    Send(handler, content);
+                    
                     //Send(handler, "OK");
                 }
                 else
                 {
-                    // Not all data received. Get more.  
+                    //Not all data received. Get more.  
                     handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(ReadCallback), state);
                 }
             }
