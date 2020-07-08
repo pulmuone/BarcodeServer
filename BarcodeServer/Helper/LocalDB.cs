@@ -27,8 +27,28 @@ namespace BarcodeServer.Helper
 
 		private LocalDB()
 		{
-			string currentPath = Path.GetDirectoryName(typeof(Program).Assembly.Location);
-			string sqlFilePath = Path.Combine(currentPath, "barcodedb.sqlite");
+			string sDirPath = @"C:\Barcode";
+			DirectoryInfo di = new DirectoryInfo(sDirPath);
+			if (di.Exists == false)
+			{
+				di.Create();
+			}
+
+			string backupDir = @"C:\Barcode\archives";
+			DirectoryInfo diBackup = new DirectoryInfo(backupDir);
+			if (diBackup.Exists == false)
+			{
+				diBackup.Create();
+			}
+
+			if(File.Exists(Path.Combine(sDirPath, "barcodedb.sqlite")))
+            {
+				File.Copy(Path.Combine(sDirPath, "barcodedb.sqlite"), Path.Combine(backupDir, string.Format("{0}{1}", "barcodedb.sqlite.", DateTime.Now.ToString("yyyyMMddHHmmss"))), true);
+			}
+
+			//string currentPath = Path.GetDirectoryName(typeof(Program).Assembly.Location);
+			//string sqlFilePath = Path.Combine(currentPath, "barcodedb.sqlite");
+			string sqlFilePath = Path.Combine(@"C:\Barcode", "barcodedb.sqlite");
 
 			connectionString = $"Data Source={sqlFilePath};";
 
@@ -65,9 +85,9 @@ namespace BarcodeServer.Helper
 				selectCommand.CommandText = "select seq from sqlite_sequence where name = @table_name";
 				selectCommand.Parameters.AddWithValue("@table_name", "invoices");
 				
-				object result = selectCommand.ExecuteScalar();
+				var result = selectCommand.ExecuteScalar();
 
-				Console.WriteLine("# result seq : " + result.ToString());
+				//Console.WriteLine("# result seq : " + result.ToString());
 				invoice_id = result.ToString();
 			}
 
@@ -241,6 +261,62 @@ namespace BarcodeServer.Helper
 			InvoiceItemSearch(invoiceId);
 		}
 
+		public string InvoiceItemInsert(int invoiceId, InvoiceItemModel invoiceItemModel)
+		{
+			string row;
+
+			using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+			{
+				connection.Open();
+				using (SQLiteTransaction mytransaction = connection.BeginTransaction())
+				{
+					SQLiteCommand insertCommand = new SQLiteCommand();
+					insertCommand.Transaction = mytransaction;
+					insertCommand.Connection = connection;
+					insertCommand.CommandText = @"
+													INSERT INTO invoice_items(invoice_id, item_id, item_nm, order_qty, scan_qty, create_date) VALUES 
+													(@invoice_id, @item_id, @item_nm, @order_qty, @scan_qty, @create_date)
+												";
+
+					insertCommand.Parameters.Add("@invoice_id", DbType.Int32);
+					insertCommand.Parameters.Add("@item_id", DbType.String);
+					insertCommand.Parameters.Add("@item_nm", DbType.String);
+					insertCommand.Parameters.Add("@order_qty", DbType.Int32);
+					insertCommand.Parameters.Add("@scan_qty", DbType.Int32);
+					insertCommand.Parameters.Add("@create_date", DbType.String);
+					//insertCommand.Parameters.Add("@modify_date", DbType.String);
+									
+					insertCommand.Parameters[0].Value = invoiceItemModel.InvoiceId;
+					insertCommand.Parameters[1].Value = invoiceItemModel.ItemId;
+					insertCommand.Parameters[2].Value = invoiceItemModel.ItemNm;
+					insertCommand.Parameters[3].Value = invoiceItemModel.OrderQty;
+					insertCommand.Parameters[4].Value = invoiceItemModel.ScanQty;
+					insertCommand.Parameters[5].Value = invoiceItemModel.CreateDate;
+					//insertCommand.Parameters[6].Value = item.ModifyDate;
+					insertCommand.Prepare();
+					int affected1 = insertCommand.ExecuteNonQuery();
+					Console.WriteLine("# of affected row: " + affected1);
+				
+					mytransaction.Commit();
+
+					SQLiteCommand selectCommand = new SQLiteCommand();
+					selectCommand.Connection = connection;
+					selectCommand.CommandText = "SELECT SEQ from sqlite_sequence WHERE name = 'invoice_items'";
+
+					//var result = selectCommand.ExecuteScalarAsync();
+					//row = Convert.ToInt32(result.Result);
+
+					var result = selectCommand.ExecuteScalarAsync();
+
+					Console.WriteLine("# result seq : " + result.Result);
+					row = result.Result.ToString();
+				}
+			}
+
+			return row;
+			//InvoiceItemSearch(invoiceId);
+		}
+
 		public void InvoiceItemUpdate(List<InvoiceItemModel> itemList)
 		{
 			using (SQLiteConnection connection = new SQLiteConnection(connectionString))
@@ -284,6 +360,52 @@ namespace BarcodeServer.Helper
 						int affected1 = insertCommand.ExecuteNonQuery();
 						Console.WriteLine("# of affected row: " + affected1);
 					}
+					mytransaction.Commit();
+				}
+			}
+		}
+
+		public void InvoiceItemUpdate(InvoiceItemModel invoiceItemModel)
+		{
+			using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+			{
+				connection.Open();
+				using (SQLiteTransaction mytransaction = connection.BeginTransaction())
+				{
+					SQLiteCommand insertCommand = new SQLiteCommand();
+					insertCommand.Transaction = mytransaction;
+					insertCommand.Connection = connection;
+					insertCommand.CommandText = @"
+													UPDATE invoice_items
+													SET 
+														item_id = @item_id
+													,	item_nm = @item_nm
+													,	order_qty = @order_qty
+													,	scan_qty = @scan_qty
+													,	modify_date = @modify_date
+													WHERE invoice_line_id = @invoice_line_id
+													AND invoice_id = @invoice_id;
+												";
+
+					insertCommand.Parameters.Add("@invoice_line_id", DbType.Int32);
+					insertCommand.Parameters.Add("@invoice_id", DbType.Int32);
+					insertCommand.Parameters.Add("@item_id", DbType.String);
+					insertCommand.Parameters.Add("@item_nm", DbType.String);
+					insertCommand.Parameters.Add("@order_qty", DbType.Int32);
+					insertCommand.Parameters.Add("@scan_qty", DbType.Int32);
+					insertCommand.Parameters.Add("@modify_date", DbType.String);
+
+					insertCommand.Parameters[0].Value = invoiceItemModel.InvoiceLineId;
+					insertCommand.Parameters[1].Value = invoiceItemModel.InvoiceId;
+					insertCommand.Parameters[2].Value = invoiceItemModel.ItemId;
+					insertCommand.Parameters[3].Value = invoiceItemModel.ItemNm;
+					insertCommand.Parameters[4].Value = invoiceItemModel.OrderQty;
+					insertCommand.Parameters[5].Value = invoiceItemModel.ScanQty;
+					insertCommand.Parameters[6].Value = invoiceItemModel.ModifyDate;
+					insertCommand.Prepare();
+					int affected1 = insertCommand.ExecuteNonQuery();
+					Console.WriteLine("# of affected row: " + affected1);
+
 					mytransaction.Commit();
 				}
 			}

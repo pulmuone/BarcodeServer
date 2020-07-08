@@ -19,7 +19,7 @@ namespace BarcodeServer
         {
             InitializeComponent();
 
-            Task.Factory.StartNew(() => AsyncSocketListener.StartListening());
+            //Task.Factory.StartNew(() => AsyncSocketListener.StartListening());
         }
 
         private void ShowNewForm(object sender, EventArgs e)

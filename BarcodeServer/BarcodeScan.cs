@@ -59,7 +59,6 @@ namespace BarcodeServer
                 Console.WriteLine(e.Message);
             }
         }
-
         public void Upload()
         {
             throw new NotImplementedException();
@@ -69,12 +68,12 @@ namespace BarcodeServer
         {
             string invoice_date = string.Empty;
 
-            Console.WriteLine(e.ColumnIndex);
-            Console.WriteLine(e.RowIndex);
+            Console.WriteLine("dgvInvoices_CellEndEdit " + e.ColumnIndex);
+            Console.WriteLine("dgvInvoices_CellEndEdit " + e.RowIndex);
             Console.WriteLine(dgvInvoices.Rows[e.RowIndex].Cells["InvoiceTitle"].Value);
 
             invoice_date = dgvInvoices.Rows[e.RowIndex].Cells["InvoiceDate"].Value?.ToString();
-
+            Console.WriteLine(invoice_date);
             if(string.IsNullOrEmpty(invoice_date))
             {
                 InvoiceModel invoiceModel = new InvoiceModel();
@@ -111,7 +110,6 @@ namespace BarcodeServer
 
         private void dgvInvoiceItems_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
-            //dgvInvoices.SelectedRows
             InvoiceItemModel itemModel = new InvoiceItemModel();
 
             if (string.IsNullOrEmpty(dgvInvoiceItems.Rows[e.RowIndex].Cells["InvoiceLineId"].Value?.ToString()))
@@ -178,35 +176,36 @@ namespace BarcodeServer
 
             if (!string.IsNullOrEmpty(itemModel.ItemId) && !string.IsNullOrEmpty(itemModel.ItemNm))
             {
-                List<InvoiceItemModel> lst = new List<InvoiceItemModel>();
-                lst.Add(itemModel);
+                //List<InvoiceItemModel> lst = new List<InvoiceItemModel>();
+                //lst.Add(itemModel);
 
                 if (itemModel.InvoiceLineId == 0) //Insert
                 {
-                    LocalDB.Instance.InvoiceItemInsert(_activeInvoiceId, lst);
+                    var row = LocalDB.Instance.InvoiceItemInsert(_activeInvoiceId, itemModel);
 
                     //수정의 기준이 되는 입력일자 화면에 업데이트 해준다.
-                    //dgvInvoiceItems.Rows[e.RowIndex].Cells["CreateDate2"].Value = itemModel.CreateDate;
+                    dgvInvoiceItems.Rows[e.RowIndex].Cells["InvoiceLineId"].Value = row;
+                    dgvInvoiceItems.Rows[e.RowIndex].Cells["CreateDate2"].Value = itemModel.CreateDate;
                 }
                 else //Update
                 {
-                    LocalDB.Instance.InvoiceItemUpdate(lst);
+                    LocalDB.Instance.InvoiceItemUpdate(itemModel);
                 }
 
                 //DataTable dt = LocalDB.Instance.InvoiceItemSearch(_activeInvoiceId);
                 //Console.WriteLine(dt.Rows.Count);
-                
-                // this.BeginInvoke(new MethodInvoker(() =>
-                // {
-                //     dgvInvoiceItems.DataSource = dt;
-                // }));
+
+                //this.BeginInvoke(new MethodInvoker(() =>
+                //{
+                //    dgvInvoiceItems.DataSource = dt;
+                //}));
             }
         }
 
         private void dgvInvoices_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            Console.WriteLine(e.RowIndex);
-            Console.WriteLine(e.ColumnIndex);
+            Console.WriteLine("dgvInvoices_CellClick " + e.RowIndex);
+            Console.WriteLine("dgvInvoices_CellClick " + e.ColumnIndex);
 
             string invoice_date = string.Empty;
 
@@ -218,8 +217,8 @@ namespace BarcodeServer
                 }
                 else
                 {
-                    invoice_date = dgvInvoices.Rows[e.RowIndex].Cells["InvoiceDate"].Value?.ToString();
-                    if (!string.IsNullOrEmpty(invoice_date))
+                    //invoice_date = dgvInvoices.Rows[e.RowIndex].Cells["InvoiceDate"].Value?.ToString();
+                    if (dgvInvoices.Rows[e.RowIndex].Cells["InvoiceDate"].Value != null)
                     {
                         _activeInvoiceId = Convert.ToInt32(dgvInvoices.Rows[e.RowIndex].Cells["InvoiceId"].Value);
 
@@ -241,7 +240,7 @@ namespace BarcodeServer
         {
             if (dgvInvoices.SelectedRows.Count > 0)
             {
-                Console.WriteLine(dgvInvoices.SelectedRows[0].Cells["InvoiceId"].Value);
+                Console.WriteLine("dgvInvoices_SelectionChanged " + dgvInvoices.SelectedRows[0].Cells["InvoiceId"].Value);
                 string invoice_date = string.Empty;
                 
                 if (dgvInvoices.SelectedRows[0].Cells["InvoiceId"].Value == null)
